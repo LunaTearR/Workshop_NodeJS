@@ -10,6 +10,7 @@ const userSchema = new Schema(
     phone: { type: String },
     image: { type: String },
     role: { type: String, enum: ["user", "admin"], default: "user" },
+    status: { type: String,enum: ["approve", "pending"], default: "pending"}
   },
   {
     timestamps: true,
