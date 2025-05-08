@@ -66,7 +66,7 @@ router.post(
         price,
         category,
         stock,
-        image: imagePath,
+        image: "../../../public/images/products" + imagePath,
       });
 
       await product.save();
