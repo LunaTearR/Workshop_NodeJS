@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var productSchema = require("../../../models/product.model");
+var orderSchema = require("../../../models/order.model");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
@@ -147,6 +148,102 @@ router.delete("/:id", async function (req, res, next) {
     return res.status(400).json({
       status: 400,
       message: "Delete products failed!",
+      error: error.message,
+    });
+  }
+});
+
+router.get("/:id/orders", async function (req, res, next) {
+  try {
+    let { id } = req.params;
+
+    const existingProduct = await productSchema.findById(id);
+
+    if (!existingProduct) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Product not found!" });
+    }
+
+    const order = await orderSchema
+      .find({
+        "items.product": id,
+      })
+      .populate("user", "firstName lastName email")
+      .populate("items.product", "name description price category stock image")
+      .sort({ createdAt: -1 })
+      .exec();
+
+    return res
+      .status(200)
+      .json({ status: 200, message: "Success!", data: order });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Failed to retrieve orders.",
+      error: error.message,
+    });
+  }
+});
+
+router.post("/:id/orders", async function (req, res, next) {
+  try {
+    let { id } = req.params;
+
+    const product = await productSchema.findById(id);
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Product not found!" });
+    }
+
+    const { user, quantity } = req.body;
+
+    if (!user || !quantity || quantity <= 0) {
+      return res.status(400).json({
+        status: 400,
+        message: "Invalid user or quantity.",
+      });
+    }
+
+    if (quantity > product.stock) {
+      return res.status(400).json({
+        status: 400,
+        message: `Not enough stock for product ${item.product}.`,
+      });
+    }
+
+    let items = { product: product, quantity };
+    console.log(items);
+
+    const order = new orderSchema({
+      user,
+      items,
+    });
+
+    await order.save();
+
+    await productSchema.findByIdAndUpdate(id, {
+      $inc: { stock: -quantity },
+    });
+
+    const populatedOrder = await orderSchema
+      .findById(order._id)
+      .populate("user", "firstName lastName email")
+      .populate("items.product", "name image price stock")
+      .sort({ createdAt: -1 })
+      .exec();
+
+    return res.status(201).json({
+      status: 201,
+      message: "Order added successfully.",
+      data: populatedOrder,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Failed to add orders.",
       error: error.message,
     });
   }
