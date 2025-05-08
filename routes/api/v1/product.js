@@ -24,7 +24,28 @@ router.get("/", async function (req, res, next) {
       .status(200)
       .json({ status: 200, message: "Success!", data: product });
   } catch (error) {
-    res.send(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Fetch products failed!",
+      error: error.message,
+    });
+  }
+});
+
+router.get("/:id", async function (req, res, next) {
+  try {
+    let { id } = req.params;
+    let product = await productSchema.findById(id);
+
+    return res
+      .status(200)
+      .json({ status: 200, message: "Success!", data: product });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Fetch products failed!",
+      error: error.message,
+    });
   }
 });
 
@@ -49,9 +70,11 @@ router.post("/", upload.single("image"), async function (req, res, next) {
       .status(200)
       .json({ status: 200, message: "Success!", data: product });
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: 400, message: "Add product failed!", error });
+    return res.status(400).json({
+      status: 400,
+      message: "Add products failed!",
+      error: error.message,
+    });
   }
 });
 
@@ -84,9 +107,11 @@ router.put("/:id", upload.single("image"), async function (req, res, next) {
       .status(200)
       .json({ status: 200, message: "Edit product success!", data: product });
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: 400, message: "Edit product failed!", error });
+    return res.status(400).json({
+      status: 400,
+      message: "Edit products failed!",
+      error: error.message,
+    });
   }
 });
 
@@ -112,16 +137,18 @@ router.delete("/:id", async function (req, res, next) {
         if (err) console.error("Image deletion failed:", err);
       });
     }
-    
+
     let product = await productSchema.findByIdAndDelete(id);
 
     return res
       .status(200)
       .json({ status: 200, message: "Delete product success!", data: product });
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: 400, message: "Delete product failed!", error });
+    return res.status(400).json({
+      status: 400,
+      message: "Delete products failed!",
+      error: error.message,
+    });
   }
 });
 
