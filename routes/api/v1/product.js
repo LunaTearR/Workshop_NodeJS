@@ -5,6 +5,7 @@ var orderSchema = require("../../../models/order.model");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const tokenMiddleware = require("../../../middleware/token.middleware");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -17,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.get("/", async function (req, res, next) {
+router.get("/", tokenMiddleware, async function (req, res, next) {
   try {
     let product = await productSchema.find({});
 
@@ -33,7 +34,7 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", tokenMiddleware, async function (req, res, next) {
   try {
     let { id } = req.params;
     let product = await productSchema.findById(id);
@@ -50,36 +51,40 @@ router.get("/:id", async function (req, res, next) {
   }
 });
 
-router.post("/", upload.single("image"), async function (req, res, next) {
-  try {
-    const { name, description, price, category, stock } = req.body;
+router.post(
+  "/",
+  [tokenMiddleware, upload.single("image")],
+  async function (req, res, next) {
+    try {
+      const { name, description, price, category, stock } = req.body;
 
-    const imagePath = req.file ? req.file.filename : null;
+      const imagePath = req.file ? req.file.filename : null;
 
-    const product = new productSchema({
-      name,
-      description,
-      price,
-      category,
-      stock,
-      image: imagePath,
-    });
+      const product = new productSchema({
+        name,
+        description,
+        price,
+        category,
+        stock,
+        image: imagePath,
+      });
 
-    await product.save();
+      await product.save();
 
-    return res
-      .status(200)
-      .json({ status: 200, message: "Success!", data: product });
-  } catch (error) {
-    return res.status(400).json({
-      status: 400,
-      message: "Add products failed!",
-      error: error.message,
-    });
+      return res
+        .status(200)
+        .json({ status: 200, message: "Success!", data: product });
+    } catch (error) {
+      return res.status(400).json({
+        status: 400,
+        message: "Add products failed!",
+        error: error.message,
+      });
+    }
   }
-});
+);
 
-router.put("/:id", upload.single("image"), async function (req, res, next) {
+router.put("/:id", tokenMiddleware, upload.single("image"), async function (req, res, next) {
   try {
     let { id } = req.params;
     const { name, description, price, category, stock } = req.body;
@@ -116,7 +121,7 @@ router.put("/:id", upload.single("image"), async function (req, res, next) {
   }
 });
 
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", tokenMiddleware, async function (req, res, next) {
   try {
     let { id } = req.params;
 
@@ -153,7 +158,7 @@ router.delete("/:id", async function (req, res, next) {
   }
 });
 
-router.get("/:id/orders", async function (req, res, next) {
+router.get("/:id/orders", tokenMiddleware, async function (req, res, next) {
   try {
     let { id } = req.params;
 
@@ -186,7 +191,7 @@ router.get("/:id/orders", async function (req, res, next) {
   }
 });
 
-router.post("/:id/orders", async function (req, res, next) {
+router.post("/:id/orders", tokenMiddleware, async function (req, res, next) {
   try {
     let { id } = req.params;
 
