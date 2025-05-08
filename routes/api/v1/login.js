@@ -32,9 +32,13 @@ router.post("/", async function (req, res, next) {
       });
     }
 
-    res.send({ message: "Login successful", user });
+    return res
+      .status(200)
+      .json({ status: 200, message: "Login successful", data: user });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", error });
+    res
+      .status(500)
+      .json({ status: 500, message: "Internal server error", error });
   }
 });
 
