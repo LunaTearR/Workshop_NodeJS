@@ -48,13 +48,13 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     const { password: _, ...safeUser } = user.toObject();
 
-    res.status(201).json({
+    return res.status(201).json({
       status: 201,
       message: "User registered successfully",
       data: safeUser,
     });
   } catch (error) {
-    res.send(error);
+    return res.status(500).json({ status: 500, message: error });
   }
 });
 
