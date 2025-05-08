@@ -41,7 +41,7 @@ router.post("/", upload.single("image"), async (req, res) => {
       role,
       status,
       password: hashedPassword,
-      image: imagePath,
+      image: "../../../public/images/users" + imagePath,
     });
 
     await user.save();
