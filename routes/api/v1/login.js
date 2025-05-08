@@ -2,6 +2,9 @@ var express = require("express");
 var router = express.Router();
 var userSchema = require("../../../models/user.model");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const SECRET_KEY = process.env.SECRET_KEY;
 
 router.post("/", async function (req, res, next) {
   try {
@@ -32,9 +35,30 @@ router.post("/", async function (req, res, next) {
       });
     }
 
-    return res
-      .status(200)
-      .json({ status: 200, message: "Login successful", data: user });
+    const token = jwt.sign(
+      {
+        email: user.email,
+        role: user.role,
+        userId: user.id,
+      },
+      SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+
+    return res.status(200).json({
+      status: 200,
+      message: "Login successful",
+      data: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        image: user.image,
+        status: user.status,
+        role: user.role,
+      },
+      token: token,
+    });
   } catch (error) {
     res
       .status(500)

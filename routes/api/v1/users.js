@@ -1,8 +1,9 @@
 var express = require("express");
 var router = express.Router();
 var userSchema = require("../../../models/user.model");
+const tokenMiddleware = require("../../../middleware/token.middleware");
 
-router.get("/", async function (req, res, next) {
+router.get("/", tokenMiddleware, async function (req, res, next) {
   try {
     let users = await userSchema.find({});
 
@@ -14,11 +15,18 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-router.put("/:id/approve", async function (req, res, next) {
+router.put("/:id/approve", tokenMiddleware, async function (req, res, next) {
   try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        status: 403,
+        message: "Only admins can approve users.",
+      });
+    }
+
     let { id } = req.params;
     let status = "approve";
-    console.log(status);
+
     let user = await userSchema.findByIdAndUpdate(
       id,
       { status },
