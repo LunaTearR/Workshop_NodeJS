@@ -84,42 +84,47 @@ router.post(
   }
 );
 
-router.put("/:id", tokenMiddleware, upload.single("image"), async function (req, res, next) {
-  try {
-    let { id } = req.params;
-    const { name, description, price, category, stock } = req.body;
+router.put(
+  "/:id",
+  tokenMiddleware,
+  upload.single("image"),
+  async function (req, res, next) {
+    try {
+      let { id } = req.params;
+      const { name, description, price, category, stock } = req.body;
 
-    const existingProduct = await productSchema.findById(id);
-    if (!existingProduct) {
+      const existingProduct = await productSchema.findById(id);
+      if (!existingProduct) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "Product not found!" });
+      }
+
+      let product = await productSchema.findByIdAndUpdate(
+        id,
+        {
+          name: name ?? existingProduct.name,
+          description: description ?? existingProduct.description,
+          price: price ?? existingProduct.price,
+          category: category ?? existingProduct.category,
+          stock: stock ?? existingProduct.stock,
+          image: req.file ? req.file.filename : existingProduct.image,
+        },
+        { new: true }
+      );
+
       return res
-        .status(404)
-        .json({ status: 404, message: "Product not found!" });
+        .status(200)
+        .json({ status: 200, message: "Edit product success!", data: product });
+    } catch (error) {
+      return res.status(400).json({
+        status: 400,
+        message: "Edit products failed!",
+        error: error.message,
+      });
     }
-
-    let product = await productSchema.findByIdAndUpdate(
-      id,
-      {
-        name: name ?? existingProduct.name,
-        description: description ?? existingProduct.description,
-        price: price ?? existingProduct.price,
-        category: category ?? existingProduct.category,
-        stock: stock ?? existingProduct.stock,
-        image: req.file ? req.file.filename : existingProduct.image,
-      },
-      { new: true }
-    );
-
-    return res
-      .status(200)
-      .json({ status: 200, message: "Edit product success!", data: product });
-  } catch (error) {
-    return res.status(400).json({
-      status: 400,
-      message: "Edit products failed!",
-      error: error.message,
-    });
   }
-});
+);
 
 router.delete("/:id", tokenMiddleware, async function (req, res, next) {
   try {
@@ -215,12 +220,12 @@ router.post("/:id/orders", tokenMiddleware, async function (req, res, next) {
     if (quantity > product.stock) {
       return res.status(400).json({
         status: 400,
-        message: `Not enough stock for product ${item.product}.`,
+        message: "Not enough stock for product.",
       });
     }
+    console.log(product.stock);
 
     let items = { product: product, quantity };
-    console.log(items);
 
     const order = new orderSchema({
       user,
