@@ -37,9 +37,9 @@ router.put("/:id/approve", tokenMiddleware, async function (req, res, next) {
       .status(201)
       .json({ status: 201, message: "Approved!", data: user });
   } catch (error) {
-    res
+    return res
       .status(500)
-      .json({ status: 500, message: "User approve fail! ", error });
+      .json({ status: 500, message: "User approve fail! ", error: error.message });
   }
 });
 

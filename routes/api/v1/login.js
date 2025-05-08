@@ -60,9 +60,9 @@ router.post("/", async function (req, res, next) {
       token: token,
     });
   } catch (error) {
-    res
+    return res
       .status(500)
-      .json({ status: 500, message: "Internal server error", error });
+      .json({ status: 500, message: "Internal server error", error: error.message });
   }
 });
 

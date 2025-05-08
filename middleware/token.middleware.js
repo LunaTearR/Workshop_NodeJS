@@ -19,7 +19,6 @@ module.exports = async (req, res, next) => {
 
     const user = await userSchema.findById(decoded.userId);
 
-
     if (!user) {
       return res.status(404).send("User not found.");
     }
@@ -28,6 +27,6 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(500).send("Token validation failed: " + error.message);
+    return res.status(500).json({ status: 500, message:"Token validation failed: " + error.message});
   }
 };
