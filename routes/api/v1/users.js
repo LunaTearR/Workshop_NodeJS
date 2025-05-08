@@ -1,69 +1,37 @@
 var express = require("express");
 var router = express.Router();
 var userSchema = require("../../../models/user.model");
-const multer = require("multer");
-const bcrypt = require("bcrypt");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./public/images/users");
-  },
-  filename: function (req, file, cb) {
-    cb(null, new Date().getTime() + "_" + file.originalname);
-  },
-});
-
-const upload = multer({ storage: storage });
 
 router.get("/", async function (req, res, next) {
   try {
     let users = await userSchema.find({});
 
-    res.send(users);
+    return res
+      .status(200)
+      .json({ status: 200, message: "Success!", data: users });
   } catch (error) {
     res.send(error);
   }
 });
 
-router.post("/", upload.single("image"), async (req, res) => {
+router.put("/:id/approve", async function (req, res, next) {
   try {
-    const { firstName, lastName, email, password, phone, role, status } =
-      req.body;
+    let { id } = req.params;
+    let status = "approve";
+    console.log(status);
+    let user = await userSchema.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
 
-    const checkuser = await userSchema.findOne({ email });
-
-    if (checkuser) {
-      return res.status(400).json({
-        status: 400,
-        message: "email is already exit. Please login.",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const imagePath = req.file ? req.file.filename : null;
-
-    const user = new userSchema({
-      firstName,
-      lastName,
-      email,
-      phone,
-      role,
-      status,
-      password: hashedPassword,
-      image: imagePath,
-    });
-
-    await user.save();
-
-    const { password: _, ...safeUser } = user.toObject();
-
-    res.status(201).json({
-      message: "User registered successfully",
-      data: safeUser,
-    });
+    return res
+      .status(201)
+      .json({ status: 201, message: "Approved!", data: user });
   } catch (error) {
-    res.send(error);
+    res
+      .status(500)
+      .json({ status: 500, message: "User approve fail! ", error });
   }
 });
 
