@@ -72,8 +72,8 @@ router.post(
       await product.save();
 
       return res
-        .status(200)
-        .json({ status: 200, message: "Success!", data: product });
+        .status(201)
+        .json({ status: 201, message: "Success!", data: product });
     } catch (error) {
       return res.status(400).json({
         status: 400,

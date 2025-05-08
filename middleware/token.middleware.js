@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
     let token = req.headers.authorization;
 
     if (!token) {
-      return res.status(401).send("Token is required.");
+      return res.status(401).json({ status: 401, message: "Token is required."});
     }
 
     if (token.startsWith("Bearer ")) {

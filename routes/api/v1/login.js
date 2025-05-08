@@ -30,7 +30,7 @@ router.post("/", async function (req, res, next) {
 
     if (isStatusApproved !== "approve") {
       return res.status(403).json({
-        status: 401,
+        status: 403,
         message: "User not approved. Please contact admin.",
       });
     }
