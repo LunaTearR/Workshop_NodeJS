@@ -2,10 +2,12 @@ var express = require("express");
 var router = express.Router();
 var productSchema = require("../../../models/product.model");
 const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./public/images/users");
+    cb(null, "./public/images/products");
   },
   filename: function (req, file, cb) {
     cb(null, new Date().getTime() + "_" + file.originalname);
@@ -85,6 +87,41 @@ router.put("/:id", upload.single("image"), async function (req, res, next) {
     res
       .status(400)
       .json({ status: 400, message: "Edit product failed!", error });
+  }
+});
+
+router.delete("/:id", async function (req, res, next) {
+  try {
+    let { id } = req.params;
+
+    const existingProduct = await productSchema.findById(id);
+
+    if (!existingProduct) {
+      return res
+        .status(404)
+        .json({ status: 404, message: "Product not found!" });
+    }
+
+    if (existingProduct.image) {
+      const imagePath = path.join(
+        __dirname,
+        "../../../public/images/products",
+        existingProduct.image
+      );
+      fs.unlink(imagePath, (err) => {
+        if (err) console.error("Image deletion failed:", err);
+      });
+    }
+    
+    let product = await productSchema.findByIdAndDelete(id);
+
+    return res
+      .status(200)
+      .json({ status: 200, message: "Delete product success!", data: product });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ status: 400, message: "Delete product failed!", error });
   }
 });
 
