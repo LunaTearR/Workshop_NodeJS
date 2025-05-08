@@ -1,8 +1,9 @@
 var express = require("express");
 var router = express.Router();
 var orderSchema = require("../../../models/order.model");
+const tokenMiddleware = require("../../../middleware/token.middleware");
 
-router.get("/", async function (req, res, next) {
+router.get("/", tokenMiddleware, async function (req, res, next) {
   try {
     let order = await orderSchema
       .find({})
