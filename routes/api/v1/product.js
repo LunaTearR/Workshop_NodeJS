@@ -39,12 +39,12 @@ router.get("/:id", tokenMiddleware, async function (req, res, next) {
     let { id } = req.params;
     let product = await productSchema.findById(id);
 
-    if(!product) {
+    if (!product) {
       return res.status(404).json({
         status: 404,
         message: "Product not found!",
-        data: product
-      })
+        data: product,
+      });
     }
 
     return res
@@ -141,9 +141,11 @@ router.delete("/:id", tokenMiddleware, async function (req, res, next) {
     const existingProduct = await productSchema.findById(id);
 
     if (!existingProduct) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "Product not found!" });
+      return res.status(404).json({
+        status: 404,
+        message: "Product not found!",
+        data: existingProduct,
+      });
     }
 
     if (existingProduct.image) {
@@ -178,9 +180,11 @@ router.get("/:id/orders", tokenMiddleware, async function (req, res, next) {
     const existingProduct = await productSchema.findById(id);
 
     if (!existingProduct) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "Product not found!" });
+      return res.status(404).json({
+        status: 404,
+        message: "Product not found!",
+        data: existingProduct,
+      });
     }
 
     const order = await orderSchema
@@ -213,7 +217,7 @@ router.post("/:id/orders", tokenMiddleware, async function (req, res, next) {
     if (!product) {
       return res
         .status(404)
-        .json({ status: 404, message: "Product not found!" });
+        .json({ status: 404, message: "Product not found!", data: product });
     }
 
     const { quantity } = req.body;
@@ -230,6 +234,7 @@ router.post("/:id/orders", tokenMiddleware, async function (req, res, next) {
       return res.status(400).json({
         status: 400,
         message: "Not enough stock for product.",
+        data: product,
       });
     }
 
