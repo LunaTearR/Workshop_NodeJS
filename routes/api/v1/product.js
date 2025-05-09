@@ -208,7 +208,8 @@ router.post("/:id/orders", tokenMiddleware, async function (req, res, next) {
         .json({ status: 404, message: "Product not found!" });
     }
 
-    const { user, quantity } = req.body;
+    const { quantity } = req.body;
+    const user = req.user._id;
 
     if (!user || !quantity || quantity <= 0) {
       return res.status(400).json({
@@ -223,7 +224,6 @@ router.post("/:id/orders", tokenMiddleware, async function (req, res, next) {
         message: "Not enough stock for product.",
       });
     }
-    console.log(product.stock);
 
     let items = { product: product, quantity };
 
